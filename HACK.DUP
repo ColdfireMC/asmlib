@@ -1,0 +1,118 @@
+
+;  hack24.asm  tmn  5/1/87
+
+;  An example of a small resident critical error handler.
+
+;  Assemble with
+
+;    MASM HACK24;
+;    LINK HACK24;
+;    DEL HACK24.OBJ
+;    EXE2COM HACK24
+;    DEL HACK24.EXE
+
+cseg    segment
+
+        org 12h
+han_p   dd ?
+
+        org 100h
+
+        assume cs:cseg, ds:nothing
+
+entry   label far
+        jmp install
+
+;  This substitute handler doesn't do much - just exits with
+;  return code 3 (DOS 3.x only) to make the DOS CALL in question
+;  fail immediately with an 0053 error.  Under earlier versions
+;  of DOS all we do is exit with rc=0.
+
+dos_vsn db ?
+
+newint24 label far
+        sti
+        cmp dos_vsn,3
+        jb  v2x
+
+        mov al,3
+        iret
+
+v2x:    mov al,0
+        iret
+
+end_of_res:
+
+;  Data areas.  Everything starting here is discarded when we
+;  issue the TSR call.
+
+pat_code equ $
+pat_op  db 0eah                   ; JMPF opcode
+pat_off dw newint24
+pat_seg dw ?
+pat_size equ $-pat_code
+
+inst_msg db 10,13,'Critical Error now Selects New Drive ...>  ',10,13
+        db 0dh, 0ah, '$'
+
+vers_msg db 'Hack24 requires DOS 2.0 or later'
+        db 0dh, 0ah, '$'
+
+        assume ds:cseg
+
+;  Mainline
+
+install:
+        mov ah,30h                ; Save major version
+        int 21h
+        mov dos_vsn,al            
+        cmp al,2                  ; need at least 2.0
+        jae ok
+
+        mov dx,offset vers_msg    ; complain
+        mov ah,09h
+        int 21h
+
+        mov al,1                  ; exit with errorlevel 1
+        mov ah,04ch
+        int 21h
+
+ok:
+        mov dx,offset inst_msg    ; display installation msg
+        mov ah,09h
+        int 21h
+
+;  Patch COMMAND.COM's own INT 24H handler to jump to us
+
+        mov ax,cs                 ; we patch segment
+        mov pat_seg,ax
+
+        mov si,offset pat_code    ; ds already -> cseg
+        les di,han_p
+        mov cx,pat_size
+        cld
+        cli
+        rep movsb                 ; patch DOS to jump to us
+        sti
+
+;  Now terminate and stay resident
+
+        mov ax,offset end_of_res  ; compute paras to reserve
+        add ax,0fh
+        shr ax,1
+        shr ax,1
+        shr ax,1
+        shr ax,1
+
+        mov dx,ax                 ; preferred TSR method
+        mov ah,31h
+        mov al,0
+        int 21h
+
+cseg    ends
+end     entry
+
+
+
+                                                      
+

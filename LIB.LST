@@ -1,0 +1,77 @@
+ATTRIBUTE_VALUE...global6           BDWRITE...........bdwrite
+CHAR_VALUE........global6           CLRSCRN...........clrscrn
+CURSOR_COLUMN.....global6           CURSOR_END........global6
+CURSOR_ROW........global6           CURSOR_START......global6
+CURSOR_VISIBLE....global6           GTCUR.............gtcur
+MKATTR............mkattr            MKTOKEN...........mktoken
+MVCUR.............mvcur             OFFCUR............offcur
+ONCUR.............oncur             RESTCUR...........restcur
+RESTSCRN..........restscrn          SAVESCRN..........savescrn
+SCRN_BUF..........global6           SCRN_SEG..........global6
+SETCUR............setcur            TOKEN_VALUE.......global6
+VDCHAR............vdchar            VDHREP............vdhrep
+VDVREP............vdvrep            VDWRITE...........vdwrite
+VIDINIT...........vidinit           VRDCHAR...........vrdchar
+WPARAM1...........global6           WPARAM11..........global6
+WPARAM2...........global6           WPARAM22..........global6
+
+
+mvcur             Offset: 00000010H  Code and data size: 13H
+  MVCUR           
+
+clrscrn           Offset: 000000a0H  Code and data size: 18H
+  CLRSCRN         
+
+bdwrite           Offset: 00000140H  Code and data size: 2fH
+  BDWRITE         
+
+oncur             Offset: 00000220H  Code and data size: cH
+  ONCUR           
+
+offcur            Offset: 000002b0H  Code and data size: cH
+  OFFCUR          
+
+setcur            Offset: 00000340H  Code and data size: 11H
+  SETCUR          
+
+mktoken           Offset: 000003d0H  Code and data size: dH
+  MKTOKEN         
+
+vidinit           Offset: 00000460H  Code and data size: 1c7H
+  VIDINIT         
+
+mkattr            Offset: 00000830H  Code and data size: 19H
+  MKATTR          
+
+vdwrite           Offset: 000008d0H  Code and data size: 59H
+  VDWRITE         
+
+vdchar            Offset: 000009e0H  Code and data size: 2bH
+  VDCHAR          
+
+vdhrep            Offset: 00000aa0H  Code and data size: 3aH
+  VDHREP          
+
+vdvrep            Offset: 00000b70H  Code and data size: 40H
+  VDVREP          
+
+savescrn          Offset: 00000c50H  Code and data size: 1eH
+  SAVESCRN        
+
+restscrn          Offset: 00000d20H  Code and data size: 1eH
+  RESTSCRN        
+
+gtcur             Offset: 00000df0H  Code and data size: 17H
+  GTCUR           
+
+restcur           Offset: 00000ee0H  Code and data size: 1bH
+  RESTCUR         
+
+vrdchar           Offset: 00000fd0H  Code and data size: 27H
+  VRDCHAR         
+
+global6           Offset: 00001090H  Code and data size: fb3H
+  ATTRIBUTE_VALUE   CHAR_VALUE        CURSOR_COLUMN     CURSOR_END
+  CURSOR_ROW        CURSOR_START      CURSOR_VISIBLE    SCRN_BUF
+  SCRN_SEG          TOKEN_VALUE       WPARAM1           WPARAM11
+  WPARAM2           WPARAM22        

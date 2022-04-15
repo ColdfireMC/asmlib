@@ -1,0 +1,2 @@
+ml /AT hello.asm
+

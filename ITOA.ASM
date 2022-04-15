@@ -1,0 +1,132 @@
+;--------------------------------------
+;
+; itoa.asm
+;
+; Convert unsigned WORD to ASCII
+;
+
+
+;--------------------------------------
+;
+; include defs, prototypes and macros
+;
+
+include tab6.inc
+
+;--------------------------------------
+;
+; local prototypes
+;
+
+print_int16 PROTO PASCAL,number:WORD
+put_16      PROTO PASCAL,digit:BYTE
+
+;--------------------------------------
+;
+; begin data segment
+;
+
+        .DATA
+
+ascii_index     dw      0
+ascii_string    db      12 DUP(?)
+
+;--------------------------------------
+;
+; begin code segment
+;
+
+    .CODE
+
+;--------------------------------------
+;
+; begin procedure
+;
+
+itoa PROC PASCAL USES es ds si di,buffer:PBYTE,num:WORD
+
+; set es:si to point to ascii_buffer
+
+        IF mdl eq 3
+        mov     ax,SEG ascii_index
+        mov     es,ax
+        mov     si,OFFSET ascii_index
+        ELSE
+        push    ds
+        pop     es
+        mov     si,ascii_index
+        ENDIF
+
+
+; initialize index to 0        
+
+        mov     ascii_index,0
+
+        INVOKE  print_int16,num
+
+; set es:[di] to point to buffer
+
+        IF mdl eq 3
+        les     di,buffer
+        ELSE
+        push    ds
+        pop     es
+        mov     di,buffer
+        ENDIF
+;
+; Move the digit string out onto the heap and return a pointer to it in
+; es:si.
+;
+; set bx to number of digits
+
+        mov     bx,ascii_index
+
+; copy ascii_string to buffer (pointer)
+
+copy_ascii_to_pointer:
+        mov     al,ascii_string[bx]
+        mov     es:[di][bx],al
+        dec     bx
+        jns     copy_ascii_to_pointer
+        ret
+
+itoa        endp
+;
+; PutI2- Recursive routine to actually print the value in AX as an integer.
+;
+
+print_int16    PROC PASCAL,number:WORD
+
+        mov     ax,number
+        mov     bx, 10
+        xor     dx, dx
+        div     bx
+        or      ax, ax        ;See if ax=0
+        jz      Done
+        push    dx
+        INVOKE  print_int16,ax
+        pop     dx
+Done:        
+        mov     al, dl
+        or      al,'0'
+        INVOKE  put_16,al
+        ret
+print_int16  endp
+
+;--------------------------------------
+;
+; Write digit to buffer
+
+put_16 PROC PASCAL,digit:BYTE
+        mov     al,digit
+        mov     di, ascii_index
+        mov     ascii_string[di],al
+        mov     Byte Ptr ascii_string+1[di],0
+        inc     ascii_index
+        ret
+put_16 ENDP
+
+        END
+
+
+

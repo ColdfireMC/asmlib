@@ -1,0 +1,201 @@
+;--------------------------------------
+;
+; ltoa.asm
+;
+; Convert long to ASCII
+;
+
+
+;--------------------------------------
+;
+; include defs, prototypes and macros
+;
+
+include tab6.inc
+
+;--------------------------------------
+;
+; local prototypes
+;
+
+print_integer PROTO PASCAL,number:WORD
+
+;--------------------------------------
+;
+; begin data segment
+;
+
+        .DATA
+
+ascii_index     dw      0
+ascii_string    db      12 DUP(?)
+
+;--------------------------------------
+;
+; begin code segment
+;
+
+    .CODE
+
+;
+;
+; LTOA-    converts the value in DX:AX to a string.  Returns a pointer to this
+;    string in ES:SI.  Carry=0 on return if no error, 1 if heap overflow.
+;
+
+;--------------------------------------
+;
+
+ltoa PROC PASCAL USES es ds si di,buffer:PBYTE,num:PWORD
+
+; set ds:bx to point to binary number
+; set es:si to point to ascii_buffer
+
+        IF mdl eq 3
+        mov     ax,SEG ascii_index
+        mov     es,ax
+        mov     si,OFFSET ascii_index
+        lds     bx,num
+        ELSE
+        push    ds
+        pop     es
+        mov     si,ascii_index
+        mov     bx,num
+        ENDIF
+
+
+; transfer long to DX:AX for Binary to ASCII xlation
+
+        mov     ax,Word Ptr ds:[bx]
+        inc     bx
+        inc     bx
+        mov     dx,Word Ptr ds:[bx]
+
+; initialize index to 0        
+
+        mov    ascii_index,0
+
+; if long's MSW is 0 
+; bypass writing minus sign
+
+        cmp    dx, 0
+        jge    bypass_minus
+        push   ax
+        mov    al, '-'
+        call   put_to_ascii_string
+        pop    ax
+        neg    dx
+        neg    ax
+        sbb    dx, 0
+;
+
+bypass_minus:        
+        INVOKE    print_integer,ax
+
+;
+; Move the digit string out onto the heap and return a pointer to it in
+; es:si.
+;
+        mov    cx, ascii_index
+        mov    bx, cx            ;Save for later.
+        inc    cx
+
+        IF mdl eq 3
+        les     di,buffer
+        ELSE
+        push    ds
+        pop     es
+        mov     di,buffer
+        ENDIF
+CopyStrLp:    
+        mov    al, ascii_string[bx]
+        mov    es:[di][bx], al
+        dec    bx
+        jns    CopyStrLp
+        clc
+        ret
+
+ltoa    ENDP
+
+
+;--------------------------------------
+;
+; ULTOA converts the unsigned dword value in DX:AX to a string and returns
+;    a pointer to this string in ES:SI.  Carry=0 if no error, 1 if heap
+;    overflow occurs.
+;
+        public    sl_ultoa
+sl_ultoa    proc    far
+        mov    ascii_index, 0
+        INVOKE    print_integer,ax
+;
+; Move the digit string out onto the heap and return a pointer to it in
+; es:si.
+;
+        mov    cx, ascii_index
+        mov    bx, cx            ;Save for later.
+        inc    cx
+;        call    sl_malloc               ;Allocate storage for string.
+        jc    BadULTOA
+CopyStrLp2:    mov    al, ascii_string[bx]
+        mov    es:[di][bx], al
+        dec    bx
+        jns    CopyStrLp2
+        clc
+        ret
+;
+BadULTOA:    stc
+        ret
+sl_ultoa    endp
+;
+;
+;
+; print_integer converts AX ax binary to ASCII integer
+;
+print_integer PROC PASCAL,number:WORD
+        mov     ax,number
+        call    Div10
+        cmp    ax, dx        ;See if dx:ax=0
+        jnz    NotDone
+        or    ax, ax
+        jz    Done
+NotDone:    push    bx
+        INVOKE    print_integer,ax
+        pop    bx
+Done:        mov    al, bl
+        or    al, '0'
+        call    put_to_ascii_string
+        ret
+print_integer ENDP
+
+;
+; Div10- Divides DX:AX by 10 leaving the remainder in BL and the quotient
+;     in DX:AX.
+;
+Div10        proc    near
+        mov    cx, 10
+        mov    bx, ax
+        xchg    ax, dx
+        xor    dx, dx
+        div    cx
+        xchg    bx, ax
+        div    cx
+        xchg    dx, bx
+        ret
+Div10        endp
+;
+;
+; PutIt- Writes the character in AL to the "ascii_string" buffer.  Also zero
+; terminates the string and increments ascii_index.  Note: no need to preserve
+; SI here because no one else uses it.
+;
+put_to_ascii_string PROC 
+        mov    di, ascii_index
+        mov    ascii_string[di], al
+        mov    byte ptr ascii_string+1[di], 0
+        inc    ascii_index
+        ret
+put_to_ascii_string ENDP
+
+        END
+

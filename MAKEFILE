@@ -1,0 +1,21 @@
+OBJECTS=dispmb.obj initmb.obj prog7-2.obj
+        
+ASMFLAGS=/Zi /c /D mdl=1
+LINKFLAGS=/Zi /D mdl=1
+prog7-2.exe : $(OBJECTS)
+ ml $(LINKFLAGS) prog7-2.obj /link /CP:32000 tab60.lib
+
+dispmb.obj : dispmb.asm
+   ml $(ASMFLAGS) dispmb.asm
+   lib tab60 -+dispmb;
+
+initmb.obj : initmb.asm
+   ml $(ASMFLAGS) initmb.asm
+   lib tab60 -+initmb;
+
+prog7-2.obj : prog7-2.asm
+   ml $(ASMFLAGS) prog7-2.asm
+
+
+
+

@@ -1,0 +1,34 @@
+ Assembling: prog16.asm
+prog16.asm(93): error A2006: undefined symbol : attr1
+prog16.asm(93): error A2114: INVOKE argument type mismatch : argument : 4
+prog16.asm(106): error A2008: syntax error : PREPARE_STRINGS
+prog16.asm(107): error A2006: undefined symbol : strcpy
+prog16.asm(116): error A2006: undefined symbol : attr1
+prog16.asm(116): error A2114: INVOKE argument type mismatch : argument : 4
+prog16.asm(76): error A2006: undefined symbol : attr1
+ SAVE_ATTRIBUTE(1): Macro Called From
+  prog16.asm(76): Main Line Code 
+prog16.asm(92): error A2006: undefined symbol : message1
+ PREPARE_STRING(6): Macro Called From
+  prog16.asm(92): Main Line Code 
+prog16.asm(92): error A2006: undefined symbol : message1
+ PREPARE_STRING(7): Macro Called From
+  prog16.asm(92): Main Line Code 
+prog16.asm(92): error A2006: undefined symbol : wparam3
+ PREPARE_STRING(9): Macro Called From
+  prog16.asm(92): Main Line Code 
+prog16.asm(92): error A2006: undefined symbol : wparam4
+ PREPARE_STRING(10): Macro Called From
+  prog16.asm(92): Main Line Code 
+prog16.asm(115): error A2006: undefined symbol : message2
+ PREPARE_STRING(6): Macro Called From
+  prog16.asm(115): Main Line Code 
+prog16.asm(115): error A2006: undefined symbol : message2
+ PREPARE_STRING(7): Macro Called From
+  prog16.asm(115): Main Line Code 
+prog16.asm(115): error A2006: undefined symbol : wparam3
+ PREPARE_STRING(9): Macro Called From
+  prog16.asm(115): Main Line Code 
+prog16.asm(115): error A2006: undefined symbol : wparam4
+ PREPARE_STRING(10): Macro Called From
+  prog16.asm(115): Main Line Code 

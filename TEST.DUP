@@ -1,0 +1,263 @@
+;--------------------------------------
+;
+; test.asm
+;
+; COM file demonstration program
+;
+
+
+move_cursor PROTO 
+
+        .MODEL TINY
+
+        .CODE
+
+        ORG 100h
+
+start:
+        jmp over_data           ; continue over data
+
+msg1    db      'Hello Chuck!','$'
+msg2    db      'Hello Baxter!',0
+msg3    db      'Hello Friskie!'
+
+over_data:
+
+; clear the screen using NORMAL
+; (White on black) attribute
+
+        mov     bh,7            ; normal attribute
+        call    clear_screen
+
+; move the cursor to 0,0
+; dh => row
+; dl => column
+; bh => page
+
+        mov     dh,0            ; row gets 0
+        mov     dl,0            ; column gets 0
+        mov     bh,0            ; on page 0
+        call    move_cursor     ; call subroutine
+
+
+; print msg 1 via DOS
+
+
+        mov dx,OFFSET msg1
+        mov ah,09h
+        int 21h
+
+; move the cursor to 1,0
+; dh => row
+; dl => column
+; bh => page
+
+        mov     dh,1            ; row gets 1
+        mov     dl,0            ; column gets 0
+        mov     bh,0            ; on page 0
+        call    move_cursor     ; call subroutine
+
+; print msg2 via BIOS int 10h
+
+        mov     si,OFFSET cs:msg2
+        call    print_string
+
+; print msg3 via bdwrite
+
+        mov     dh,2            ; row 2
+        mov     dl,0            ; column 0
+        mov     cx,LENGTHOF msg3 ; set string length
+        mov     bx,OFFSET msg3  ; msg3 pointer
+        call    bdwrite
+
+        
+; move the cursor to 4,20
+; dh => row
+; dl => column
+; bh => page
+
+        mov     dh,4            ; row gets 4
+        mov     dl,20           ; column gets 20
+        mov     bh,0            ; on page 0
+        call    move_cursor     ; call subroutine
+
+; draw a horizontal line to 40 bytes in length
+
+        mov     cx,40           ; write 40 bytes
+        mov     al,196          ; horizontal char
+        mov     ah,0ah          ; write cx num of chars
+        int     10h             ; via BIOS video services
+
+; move the cursor to 16,20
+; dh => row
+; dl => column
+; bh => page
+
+        mov     dh,16           ; row gets 16
+        mov     dl,20           ; column gets 20
+        mov     bh,0            ; on page 0
+        call    move_cursor     ; call subroutine
+
+; draw a horizontal line to 40 bytes in length
+
+        mov     cx,40           ; write 40 bytes
+        mov     al,196          ; horizontal char
+        mov     ah,0ah          ; write cx num of chars
+        int     10h             ; via BIOS video services
+
+; draw vertical bar on left edge of border
+
+        mov     cx,12           ; vertical 12 rows
+        mov     dh,4            ; set start row
+        mov     dl,20           ; set start column
+        call    draw_vertical   ; draw vertical edge
+
+; draw vertical bar on right edge of border
+
+        mov     cx,12           ; vertical 12 rows
+        mov     dh,4            ; set start row
+        mov     dl,60           ; set start column
+        call    draw_vertical   ; draw vertical edge
+        
+
+
+; return to DOS
+
+        mov ah,4ch 
+        int 21h
+
+;
+; end of main section of code
+;--------------------------------------
+
+;--------------------------------------
+;
+; Beginning of subroutines
+;
+;--------------------------------------
+
+;--------------------------------------
+; move_cursor
+;
+; Moves the cursor on a specified
+; video page on row (dh) and col (dl)
+;
+; Entry: 
+;       dh row
+;       dl column
+;       bh page
+;
+; Returns: 
+;       Nothing
+;
+
+move_cursor PROC 
+        mov     ah,02h          ; set cursor position
+        int     10h             ; move cursor via BIOS
+        ret
+move_cursor ENDP
+
+;--------------------------------------
+; clear_screen 
+;
+; Clears the screen using specified
+; screen attribute
+;
+; Entry: 
+;       bh screen attribute
+;
+; Returns: 
+;       Nothing
+;
+
+clear_screen PROC
+        mov     ah,6            ; scroll up
+        mov     al,0            ; blank entire screen
+        mov     cx,0            ; upper left (0,0)
+        mov     dx,184fh        ; lower right (24,79)
+        int     10h             ; via BIOS int 10h
+        ret
+clear_screen ENDP
+
+;--------------------------------------
+; print_string
+;
+; Prints a NUL terminated string
+;
+; Entry: 
+;       si points to string offset
+;
+; Returns: 
+;       Nothing
+;
+
+print_string PROC
+        mov     ah,0eh          ; print in teletype mode
+        mov     bh,0            ; on video page 0
+p_s:
+        lodsb                   ; get char to al
+        cmp     al,0            ; at string end?
+        je      p_s_done        ; yes -> branch
+        int     10h             ; via BIOS int 10h
+        jmp     p_s             ; no get next char
+p_s_done:
+        ret
+print_string ENDP
+
+
+;--------------------------------------
+; bdwrite
+;
+; Prints a NUL terminated string
+;
+; Entry: 
+;       si string
+;       dh row start
+;       dl col start
+;       cx string length
+;       dx pointer to string
+;
+; Returns: 
+;       Nothing
+;
+
+bdwrite PROC
+        push    bp              ; save bp
+        mov     bp,bx           ; string offset => bp
+        mov     bh,0            ; page 0
+        mov     bl,7            ; NORMAL screen attribute
+        mov     ah,13h          ; write string function
+        mov     al,1            ; update cursor / chars only
+        int     10h             ; via BIOS video services
+        pop     bp              ; restore bp
+        ret
+bdwrite ENDP
+
+draw_vertical PROC
+loc_1:
+        push    cx              ; save counter
+        mov     bh,0            ; write on page 0
+        call    move_cursor     ; move the cursor
+        mov     ah,09h          ; write char at cursor function
+        mov     al,179          ; vertical bar
+        mov     bl,7            ; NORMAL attribute
+        mov     cx,1            ; write 1 byte
+        int     10h             ; write via BIOS Screen services
+        inc     dh              ; increment row
+        pop     cx              ; restore cx
+        loop    loc_1           ; loop 12 times
+        ret
+ draw_vertical ENDP
+
+;--------------------------------------
+; end of program
+
+        END start
+
+;
+;--------------------------------------
+
+
+
+                                                      
+
